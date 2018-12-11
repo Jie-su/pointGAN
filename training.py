@@ -60,7 +60,7 @@ discriminator = discriminator()
 # Loading data
 transformation = transforms.Compose([transforms.ToTensor])
 pointData = pointDataset(training_data, index, transform=None)
-train_loader = torch.utils.data.DataLoader(pointData, batch_size=64, shuffle=True)
+train_loader = torch.utils.data.DataLoader(pointData, batch_size=64, shuffle=False)
 
 # Setting optimizer
 generatorOptimizor = torch.optim.Adam(generator.parameters(), lr = 0.001)
@@ -80,7 +80,7 @@ for epoch in range(0, 1000):
         gen_update(noise, generator, discriminator, generatorOptimizor)
 
 
-        if (iterations+1) % 100 == 0:
+        if (iterations+1) % 500 == 0:
             generator.eval()
             generate_point = generator(fix_noise)
             x = generate_point.data[:, 0].numpy()
