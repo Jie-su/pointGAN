@@ -8,7 +8,9 @@ from model import generator, discriminator
 from torchvision import transforms
 from torch.autograd import Variable
 
-def gen_update(noise, generator, discriminator, genopt):
+def gen_update(noise, generator, discriminator, genopt, disopt):
+    genopt.zero_grad()
+    disopt.zero_grad()
     output = generator(noise)
     real_output = discriminator(output)
 
@@ -19,7 +21,10 @@ def gen_update(noise, generator, discriminator, genopt):
     adv_loss.backward()
     genopt.step()
 
-def dis_update(noise, point, generator, discriminator, disopt):
+
+def dis_update(noise, point, generator, discriminator, disopt, genopt):
+    disopt.zero_grad()
+    genopt.zero_grad()
     output = generator(noise)
     fake_output = discriminator(output)
     real_output = discriminator(point)
@@ -36,7 +41,7 @@ def dis_update(noise, point, generator, discriminator, disopt):
 
 
 # define three guassian distribution
-mu = [[-8, 6], [8, 6], [6, -6]]
+mu =  [[-4, 4], [4, 4], [0, -4]]
 cov_1 = [[1, 0], [0, 1]]
 cov_2 = [[1, 0], [0, 1]]
 cov_3 = [[1, 0], [0, 1]]
@@ -58,15 +63,14 @@ generator = generator()
 discriminator = discriminator()
 
 # Loading data
-transformation = transforms.Compose([transforms.ToTensor])
-pointData = pointDataset(training_data, index, transform=None)
-train_loader = torch.utils.data.DataLoader(pointData, batch_size=64, shuffle=False)
+pointData = pointDataset(training_data, index)
+train_loader = torch.utils.data.DataLoader(pointData, batch_size=64, shuffle=True)
 
 # Setting optimizer
-generatorOptimizor = torch.optim.Adam(generator.parameters(), lr = 0.001)
-discriminatorOptimizor = torch.optim.Adam(discriminator.parameters(), lr = 0.001)
+generatorOptimizor = torch.optim.Adam(generator.parameters(), lr = 0.0001)
+discriminatorOptimizor = torch.optim.Adam(discriminator.parameters(), lr = 0.0001)
 iterations = 0
-fix_noise = torch.randn(64, 2)
+fix_noise = torch.randn(1000, 2)
 for epoch in range(0, 1000):
     discriminator.train()
     for it, (point,_) in enumerate(train_loader):
@@ -76,8 +80,8 @@ for epoch in range(0, 1000):
         point = Variable(point.float())
         fix_noise = Variable(fix_noise)
 
-        dis_update(noise, point, generator, discriminator, discriminatorOptimizor)
-        gen_update(noise, generator, discriminator, generatorOptimizor)
+        dis_update(noise, point, generator, discriminator, discriminatorOptimizor, generatorOptimizor)
+        gen_update(noise, generator, discriminator, generatorOptimizor, discriminatorOptimizor)
 
 
         if (iterations+1) % 500 == 0:
@@ -87,8 +91,11 @@ for epoch in range(0, 1000):
             y = generate_point.data[:, 1].numpy()
             x_real = training_data.data[:, 0].numpy()
             y_real = training_data.data[:, 1].numpy()
+            x_noise = fix_noise.data[:,0].numpy()
+            y_noise = fix_noise.data[:,1].numpy()
+            plt.plot(x_noise,y_noise, 'yx')
             plt.plot(x_real, y_real, 'bx')
-            plt.plot(x, y, 'ro')
+            plt.plot(x, y, 'rx')
             plt.axis('equal')
             plt.show()
 

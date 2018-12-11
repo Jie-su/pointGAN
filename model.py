@@ -28,7 +28,13 @@ class pointDiscriminatorLayer(nn.Module):
 class generator(nn.Module):
     def __init__(self):
         super(generator, self).__init__()
-        self.projector = pointGeneratorLayer()
+        self.projector = nn.Sequential(
+            nn.Linear(2, 10),
+            nn.ReLU(),
+            nn.Linear(10, 50),
+            nn.ReLU(),
+            nn.Linear(50,2),
+        )
 
     def forward(self, x):
         output = self.projector(x)
@@ -40,7 +46,11 @@ class generator(nn.Module):
 class discriminator(nn.Module):
     def __init__(self):
         super(discriminator, self).__init__()
-        self.projector = pointDiscriminatorLayer()
+        self.projector = nn.Sequential(
+            nn.Linear(2, 50),
+            nn.ReLU(),
+            nn.Linear(50, 1),
+        )
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
