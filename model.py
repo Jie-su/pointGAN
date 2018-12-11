@@ -8,9 +8,7 @@ class pointGeneratorLayer(nn.Module):
         self.weight_1 = nn.Parameter(torch.zeros(2, 2))
 
     def forward(self, x):
-        # unfortunately we don't have automatic broadcasting yet
         output_1 = torch.mm(x, self.weight_1)
-
         return output_1
 
 

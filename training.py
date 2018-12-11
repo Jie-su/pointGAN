@@ -25,7 +25,7 @@ def dis_update(noise, point, generator, discriminator, disopt):
     real_output = discriminator(point)
 
     ones = Variable(torch.FloatTensor(np.ones(real_output.size(0), dtype=np.int)))
-    zeros = Variable(torch.FloatTensor(np.ones(fake_output.size(0), dtype=np.int)))
+    zeros = Variable(torch.FloatTensor(np.zeros(fake_output.size(0), dtype=np.int)))
 
     real_adv_loss = nn.functional.binary_cross_entropy(real_output, ones)
     fake_adv_loss = nn.functional.binary_cross_entropy(fake_output, zeros)
@@ -38,8 +38,8 @@ def dis_update(noise, point, generator, discriminator, disopt):
 # define three guassian distribution
 mu = [[-8, 6], [8, 6], [6, -6]]
 cov_1 = [[1, 0], [0, 1]]
-cov_2 = [[1, 0.5], [0.5, 1]]
-cov_3 = [[0.5, 1], [1, 0.5]]
+cov_2 = [[1, 0], [0, 1]]
+cov_3 = [[1, 0], [0, 1]]
 
 
 x_1, y_1 = np.random.multivariate_normal(mu[0], cov_1, 3200).T
@@ -79,16 +79,16 @@ for epoch in range(0, 1000):
         dis_update(noise, point, generator, discriminator, discriminatorOptimizor)
         gen_update(noise, generator, discriminator, generatorOptimizor)
 
-        if (iterations+1) % 1000 == 0:
+
+        if (iterations+1) % 100 == 0:
             generator.eval()
             generate_point = generator(fix_noise)
-            generate_data = generate_point.data
-            x = generate_data[:, 0].numpy()
-            y = generate_data[:, 1].numpy()
-            plt.plot(x_1, y_1, 'bx')
-            plt.plot(x_2, y_2, 'bo')
-            plt.plot(x_3, y_3, 'b.')
-            plt.plot(x, y, 'rx')
+            x = generate_point.data[:, 0].numpy()
+            y = generate_point.data[:, 1].numpy()
+            x_real = training_data.data[:, 0].numpy()
+            y_real = training_data.data[:, 1].numpy()
+            plt.plot(x_real, y_real, 'bx')
+            plt.plot(x, y, 'ro')
             plt.axis('equal')
             plt.show()
 
