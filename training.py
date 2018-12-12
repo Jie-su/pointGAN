@@ -41,7 +41,7 @@ def dis_update(noise, point, generator, discriminator, disopt, genopt):
 
 
 # define three guassian distribution
-mu =  [[-4, 4], [4, 4], [0, -4]]
+mu =  [[-4, 4], [3, 7], [0, -5]]
 cov_1 = [[1, 0], [0, 1]]
 cov_2 = [[1, 0], [0, 1]]
 cov_3 = [[1, 0], [0, 1]]
@@ -82,9 +82,9 @@ for epoch in range(0, 1000):
 
         dis_update(noise, point, generator, discriminator, discriminatorOptimizor, generatorOptimizor)
         gen_update(noise, generator, discriminator, generatorOptimizor, discriminatorOptimizor)
+        print(iterations)
 
-
-        if (iterations+1) % 500 == 0:
+        if (iterations+1) % 100 == 0:
             generator.eval()
             generate_point = generator(fix_noise)
             x = generate_point.data[:, 0].numpy()
@@ -93,11 +93,15 @@ for epoch in range(0, 1000):
             y_real = training_data.data[:, 1].numpy()
             x_noise = fix_noise.data[:,0].numpy()
             y_noise = fix_noise.data[:,1].numpy()
-            plt.plot(x_noise,y_noise, 'yx')
+            #plt.plot(x_noise,y_noise, 'yx')
             plt.plot(x_real, y_real, 'bx')
             plt.plot(x, y, 'rx')
             plt.axis('equal')
-            plt.show()
+            plt.ylim(-10, 10)
+            plt.xlim(-10, 10)
+            filename='%d.png' %iterations
+            plt.savefig(filename)
+            plt.close()
 
         iterations += 1
 
